@@ -1,47 +1,64 @@
-# Instructions for the user
-print("This program will shift each character in your sentence either upwards or downwards in the ASCII alphabet.")
-print("The shift will be based on the number you provide.")
-print("Letters, numbers, and symbols will all be shifted.")
-print("Note: This shift will wrap around within the alphabet or character set if necessary.")
+# Explain what the program does
+def print_instructions():
+    print("This program will shift each character in your sentence either upwards or downwards in the ASCII alphabet.")
+    print("The shift will be based on the number you provide.")
+    print("Letters, numbers, and symbols will all be shifted, while spaces stay where they are.")
+    print("Note: Shifting past either end of the ASCII alphabet (0-127) wraps around to the other end.")
 
-# Ask the user if they want to view the entire ASCII alphabet
-while True:
-    view_ascii = input("Do you want to view the entire ASCII alphabet? (yes/no): ").strip().lower()
-    if view_ascii in ["yes", "no"]:
-        break
-    else:
-        print("Please enter 'yes' or 'no'.")
 
-# If the user wants to view the ASCII alphabet, display it
-if view_ascii == "yes":
+# Keep asking until the user gives one of the two allowed answers
+def ask_choice(prompt, options):
+    while True:
+        answer = input(prompt).strip().lower()
+        if answer in options:
+            return answer
+        print(f"Please enter '{options[0]}' or '{options[1]}'.")
+
+
+# Keep asking until the user gives a whole number
+def ask_integer(prompt):
+    while True:
+        answer = input(prompt).strip()
+        try:
+            return int(answer)
+        except ValueError:
+            print("Please enter a whole number.")
+
+
+# Display the printable ASCII characters (32-126), 10 per line
+def print_ascii_table():
     print("\nASCII Alphabet:")
-    for i in range(32, 128):  # Printable ASCII characters range from 32 to 127
-        print(f"{i}: {chr(i)}", end="  ")
-        if (i - 31) % 10 == 0:  # Print 10 characters per line for readability
+    for code in range(32, 127):
+        print(f"{code}: {chr(code)}", end="  ")
+        if (code - 31) % 10 == 0:
             print()
     print("\n")
 
-# Ask the user if they want to shift up or down
-while True:
-    direction = input("Do you want to shift the characters up or down? (up/down): ").strip().lower()
-    if direction in ["up", "down"]:
-        break
-    else:
-        print("Please enter 'up' or 'down'.")
 
-# Input from the user
-theirSen = input("Type a sentence: ")
-theirShift = int(input(f"Type the amount you want to shift your sentence {direction}: "))
+# Shift every printable ASCII character except spaces; anything else is kept as is
+def shift_sentence(sentence, shift_amount):
+    shifted_chars = []
+    for char in sentence:
+        if char.isascii() and char.isprintable() and not char.isspace():
+            shifted_code = (ord(char) + shift_amount) % 128
+            shifted_chars.append(chr(shifted_code))
+        else:
+            shifted_chars.append(char)
+    return "".join(shifted_chars)
 
-# Shifting the sentence
-for char in theirSen:
-    if char.isprintable() and not char.isspace():  # Shift only printable, non-space characters
-        if direction == "up":
-            shifted = (ord(char) + theirShift) % 128  # Shift up within the ASCII range (0-127)
-        else:  # direction == "down"
-            shifted = (ord(char) - theirShift) % 128  # Shift down within the ASCII range (0-127)
-        print(chr(shifted), end="")
-    else:
-        print(char, end="")  # Print spaces and non-printable characters as is
 
-print("\nYour sentence has been shifted according to the ASCII alphabet.")
+print_instructions()
+
+if ask_choice("Do you want to view the entire ASCII alphabet? (yes/no): ", ["yes", "no"]) == "yes":
+    print_ascii_table()
+
+direction = ask_choice("Do you want to shift the characters up or down? (up/down): ", ["up", "down"])
+
+theirSentence = input("Type a sentence: ")
+theirShift = ask_integer(f"Type the amount you want to shift your sentence {direction}: ")
+
+# Shifting down is the same as shifting up by a negative amount
+signed_shift = theirShift if direction == "up" else -theirShift
+
+print(shift_sentence(theirSentence, signed_shift))
+print("Your sentence has been shifted according to the ASCII alphabet.")
